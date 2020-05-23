@@ -1,4 +1,4 @@
-#version 450
+#version 410
 
 // Adapted from https://www.shadertoy.com/view/WdyXDR
 // MIT License

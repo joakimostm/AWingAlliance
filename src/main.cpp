@@ -19,9 +19,15 @@
 #include <glm/gtx/hash.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include <GL/glew.h>
-#include <GL/freeglut.h>
-
+#ifdef __APPLE__
+    #define GL_SILENCE_DEPRECATION
+    #include <GL/glew.h>
+    #include <GLUT/glut.h>
+#else
+    #include <GL/glew.h>
+    #include <GL/freeglut.h>
+#endif
+ 
 #include <actor/ship.h>
 #include <keyboard.h>
 #include <terrain.h>
@@ -30,7 +36,13 @@
 #include <renderer.h>
 #include <game_state.h>
 
-constexpr float FOV_Y = glm::radians(45.0f);
+
+#ifdef __APPLE__
+    const float FOV_Y = glm::radians(45.0f);
+#else
+    constexpr float FOV_Y = glm::radians(45.0f);
+#endif
+
 uint SCREEN_W, SCREEN_H;
 
 std::chrono::system_clock::time_point t;
@@ -48,11 +60,9 @@ void init()
 
     parser = std::make_unique<ScenarioParser>("scenario1.json");
     parser->Parse();
-
     renderer = Renderer::Create(SCREEN_W, SCREEN_H);
     renderer->load_models(parser->required_models);
     renderer->register_skybox(parser->skybox);
-
     game_state = GameState::Create(renderer->GetModels());
     game_state->register_ships(parser->actors);
     game_state->register_terrain(parser->terrain.get());
@@ -114,14 +124,22 @@ void onReshape(int width, int height)
 int main(int argc, char* argv[])
 {
     glutInit(&argc, argv);
-    glutInitContextVersion(3, 2);
-    glutInitDisplayMode(GLUT_RGBA | GLUT_ALPHA | GLUT_DEPTH);  // GLUT_DOUBLE
+    #ifdef __APPLE__
+        glutInitDisplayMode(GLUT_RGBA | GLUT_ALPHA | GLUT_DEPTH | GLUT_3_2_CORE_PROFILE);  // GLUT_DOUBLE
+    #else
+        glutInitContextVersion(3, 2);
+        glutInitDisplayMode(GLUT_RGBA | GLUT_ALPHA | GLUT_DEPTH);  // GLUT_DOUBLE
+    #endif
+
     SCREEN_W = 1200;
     SCREEN_H = 900;
     glutInitWindowSize(SCREEN_W, SCREEN_H);
     glutCreateWindow("awing");
 
-    // glewExperimental = GL_TRUE;
+    #ifdef __APPLE__
+        glewExperimental = GL_TRUE;
+        glewInit();
+    #endif
 
     GLenum glew_status = glewInit();
     if (glew_status != GLEW_OK)

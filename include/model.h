@@ -7,6 +7,7 @@
 #include <memory>
 #include <model.h>
 #include <iostream>
+#include <array>
 
 #include <GL/glew.h>
 

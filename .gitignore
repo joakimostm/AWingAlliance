@@ -34,3 +34,4 @@ build/*
 awing
 Textures/
 Models/
+.DS_Store
